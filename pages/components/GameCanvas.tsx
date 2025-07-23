@@ -7,10 +7,10 @@ import { GameContext } from "../context/GameContext";
 
 export default function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { gameState } = useContext(GameContext);
+  const { gameState, loseLife, setGameState } = useContext(GameContext);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas: any = canvasRef.current;
     if (!canvas) return;
     const ctx: any = canvas.getContext("2d");
     if (!ctx) return;
@@ -19,16 +19,18 @@ export default function GameCanvas() {
     const height = canvas.height;
 
     let animationFrameId: number;
-    let paddle = {
+    const paddle = {
       x: width / 2 - 50,
       y: height - 20,
       width: 100,
       height: 10,
       speed: 8,
     };
-    let ball = {
+    const keys: Record<string, boolean> = {};
+
+    const ball = {
       x: paddle.x + paddle.width / 2,
-      y: paddle.y - 8, // place ball above paddle
+      y: paddle.y - 8,
       radius: 8,
       dx: 4,
       dy: -4,
@@ -50,14 +52,37 @@ export default function GameCanvas() {
     }
 
     function update() {
+      // Keyboard control
+      if (keys["ArrowLeft"] && paddle.x > 0) {
+        paddle.x -= paddle.speed;
+      }
+      if (keys["ArrowRight"] && paddle.x + paddle.width < width) {
+        paddle.x += paddle.speed;
+      }
+
+      // Ball movement
       ball.x += ball.dx;
       ball.y += ball.dy;
 
-      // Wall collision
+      // Wall collisions
       if (ball.x + ball.radius > width || ball.x - ball.radius < 0)
         ball.dx *= -1;
       if (ball.y - ball.radius < 0) ball.dy *= -1;
+
+      // Paddle collision
+      if (
+        ball.y + ball.radius >= paddle.y &&
+        ball.x >= paddle.x &&
+        ball.x <= paddle.x + paddle.width
+      ) {
+        ball.dy *= -1;
+        ball.y = paddle.y - ball.radius;
+      }
+
+      // Missed ball
       if (ball.y + ball.radius > height) {
+        loseLife();
+        setGameState("START");
         cancelAnimationFrame(animationFrameId);
       }
     }
@@ -68,15 +93,36 @@ export default function GameCanvas() {
       animationFrameId = requestAnimationFrame(loop);
     }
 
-    // Always draw initial frame on mount
+    // Initial draw
     draw();
+    if (gameState === "PLAYING") loop();
 
-    if (gameState === "PLAYING") {
-      loop();
+    function handleKeyDown(e: KeyboardEvent) {
+      keys[e.key] = true;
+    }
+    function handleKeyUp(e: KeyboardEvent) {
+      keys[e.key] = false;
+    }
+    function handleMouseMove(e: MouseEvent) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      paddle.x = Math.min(
+        Math.max(mouseX - paddle.width / 2, 0),
+        width - paddle.width
+      );
     }
 
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [gameState]);
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [gameState, loseLife, setGameState]);
 
   return (
     <canvas
