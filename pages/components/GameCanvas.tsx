@@ -14,6 +14,11 @@ export default function GameCanvas() {
   const bricks = bricksRef.current;
 
   useEffect(() => {
+    if (gameState === "START") {
+      bricksRef.current = createBricks();
+    }
+  }, [gameState]);
+  useEffect(() => {
     const canvas: any = canvasRef.current;
     if (!canvas) return;
     const ctx: any = canvas.getContext("2d");
@@ -155,7 +160,7 @@ export default function GameCanvas() {
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [gameState, loseLife, setGameState]);
+  }, [bricks, gameState, loseLife, setGameState]);
 
   return (
     <canvas
