@@ -4,10 +4,14 @@
 
 import { useRef, useEffect, useContext } from "react";
 import { GameContext } from "../context/GameContext";
+import { Brick, brickSettings, createBricks } from "../utils/bricks";
 
 export default function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { gameState, loseLife, setGameState } = useContext(GameContext);
+
+  const bricksRef = useRef<Brick[][]>(createBricks());
+  const bricks = bricksRef.current;
 
   useEffect(() => {
     const canvas: any = canvasRef.current;
@@ -24,7 +28,7 @@ export default function GameCanvas() {
       y: height - 20,
       width: 100,
       height: 10,
-      speed: 8,
+      speed: 16,
     };
     const keys: Record<string, boolean> = {};
 
@@ -49,6 +53,17 @@ export default function GameCanvas() {
       // Paddle
       ctx.fillStyle = "white";
       ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+
+      //draw bricks
+      for (let c = 0; c < brickSettings.columnCount; c++) {
+        for (let r = 0; r < brickSettings.rowCount; r++) {
+          if (bricks[c][r].status === 1) {
+            const b = bricks[c][r];
+            ctx.fillStyle = "orange";
+            ctx.fillRect(b.x, b.y, brickSettings.width, brickSettings.height);
+          }
+        }
+      }
     }
 
     function update() {
@@ -84,6 +99,24 @@ export default function GameCanvas() {
         loseLife();
         setGameState("START");
         cancelAnimationFrame(animationFrameId);
+      }
+
+      for (let c = 0; c < brickSettings.columnCount; c++) {
+        for (let r = 0; r < brickSettings.rowCount; r++) {
+          const b = bricks[c][r];
+          if (b.status === 1) {
+            if (
+              ball.x > b.x &&
+              ball.x < b.x + brickSettings.width &&
+              ball.y > b.y &&
+              ball.y < b.y + brickSettings.height
+            ) {
+              ball.dy *= -1;
+              b.status = 0;
+              // TODO: add scoring logic here
+            }
+          }
+        }
       }
     }
 
