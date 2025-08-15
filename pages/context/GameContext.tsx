@@ -19,7 +19,7 @@ export const GameContext = createContext<GameContextType>(
   {} as GameContextType
 );
 
-export function GameProvider({ children }: { children: ReactNode }) {
+export default function GameProvider({ children }: { children: ReactNode }) {
   const [gameState, setGameState] = useState<GameState>("START");
   const [score, setScore] = useState<number>(0);
   const [lives, setLives] = useState<number>(3);
@@ -30,7 +30,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const restartGame = () => {
     setScore(0);
-    setLives(3);
+    setLives(1);
     setGameState("START");
   };
 

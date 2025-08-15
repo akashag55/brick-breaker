@@ -24,7 +24,7 @@ export const brickSettings: BrickLayout = {
   offsetLeft: 35,
 };
 
-export function createBricks(layout = brickSettings): Brick[][] {
+export default function createBricks(layout = brickSettings): Brick[][] {
   const bricks: Brick[][] = [];
   for (let c = 0; c < layout.columnCount; c++) {
     bricks[c] = [];
