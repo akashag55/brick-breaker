@@ -31,7 +31,7 @@ export default function Adsense({
     <ins
       className={`adsbygoogle ${className || ""}`}
       style={{ display: "block" }}
-      data-ad-client="ca-pub-xxxxxxxxxx"
+      data-ad-client="ca-pub-3940256099942544"
       data-ad-slot={slot}
       data-ad-format={format}
     ></ins>
