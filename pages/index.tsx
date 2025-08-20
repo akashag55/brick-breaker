@@ -9,7 +9,7 @@ export default function Home() {
     <main className="flex min-h-screen bg-gray-900 text-white">
       {/* Left Ad */}
       <div className="hidden md:flex w-1/6 items-center justify-center">
-        <Adsense slot="1234567890" format="auto" />
+        <Adsense slot="1111111111" format="vertical" />
       </div>
 
       {/* Game Content */}
